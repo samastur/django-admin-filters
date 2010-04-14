@@ -1,0 +1,28 @@
+====================
+Django Admin Filters
+====================
+
+Allows you to use generic filters for the admin changelist view.
+
+Example::
+
+	from adminfilters.admin import GenericFilterAdmin
+	from django.contrib.admin.filterspec import FilterSpec
+
+
+	class SomeFilterSpec(FilterSpec):
+		def __init__(self, request, changelist):
+			"""
+			Your filter spec code here	
+			"""
+			
+		def choices(self, changelist):
+			"""
+			Your choices generator here
+			"""
+	
+	class MyAdmin(GenericFilterAdmin):
+		generic_filters = ('get_my_filter',)
+		
+		def get_my_filter(self, request, changelist):
+			return SomeFilterSpec(request, changelist)
