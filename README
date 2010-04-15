@@ -4,6 +4,9 @@ Django Admin Filters
 
 Allows you to use generic filters for the admin changelist view.
 
+Quickstart
+----------
+
 Example::
 
 	from adminfilters.admin import GenericFilterAdmin
@@ -29,3 +32,42 @@ Example::
 	                           letter.upper()))
 	            return cl.build_filter_spec(choices, 'alphabetic')
 	        return False
+	        
+	        
+Generic Filters Property
+------------------------
+
+The ``generic_filters`` property on a ``GenericFilterAdmin`` subclass defines a
+sequence of filter methods on the same class. 
+	        
+	        
+Filter Methods
+--------------
+
+A filter method takes a ``HttpRequest`` object and a ``GenericFilterChangeList``
+object as arguments. It returns either False if this filter has no output for 
+the given request and/or environment or a ``FilterSpec`` object.
+
+GenericFilterChangeList.build_filter_spec
+-----------------------------------------
+
+This method takes two arguments. A sequence or callable defining the available
+choices and a title to be used for the filter spec. It returns a ``FilterSpec``
+object. This is a helper method to quickly build ``FilterSpec`` objects without
+actually writing a ``FilterSpec`` subclass.
+
+If a callable is given as first argument, it should return a sequence when
+called.
+
+The sequence should contain 3-item sequences like this:
+
+ * A boolean object whether this option is currently selected or not.
+ * A query string to be used to activate this filter
+ * A string to be displayed as the choices' label.
+
+GenericFilterChangeList.get_query_string
+----------------------------------------
+
+This method takes two arguments. A dictionary of key-value pairs to be *added*
+to the query string and optionally a sequence of keys to be *removed* from the
+query string. It returns a query string. 
