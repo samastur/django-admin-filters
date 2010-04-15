@@ -7,22 +7,25 @@ Allows you to use generic filters for the admin changelist view.
 Example::
 
 	from adminfilters.admin import GenericFilterAdmin
-	from django.contrib.admin.filterspec import FilterSpec
-
-
-	class SomeFilterSpec(FilterSpec):
-		def __init__(self, request, changelist):
-			"""
-			Your filter spec code here	
-			"""
-			
-		def choices(self, changelist):
-			"""
-			Your choices generator here
-			"""
+	import string
 	
 	class MyAdmin(GenericFilterAdmin):
-		generic_filters = ('get_my_filter',)
-		
-		def get_my_filter(self, request, changelist):
-			return SomeFilterSpec(request, changelist)
+		generic_filters = ('alphabetic_filter',)
+    
+	    def alphabetic_filter(self, request, cl):
+	        """
+	        Creates an alphabetic filter for the 'name' field on the model
+	        registered to this admin
+	        """
+	        if self.model.objects.all().count():
+	            selected = request.GET.get('name__istartswith', None)
+	            choices = [(selected is None,
+	                   cl.get_query_string({}, ['name__istartswith']),
+	                   'All')]
+	            for letter in string.ascii_lowercase:
+	                if self.model.objects.filter(name__istartswith=letter).count():
+	                    choices.append((selected == letter,
+	                           cl.get_query_string({'name__istartswith': letter}),
+	                           letter.upper()))
+	            return cl.build_filter_spec(choices, 'alphabetic')
+	        return False
