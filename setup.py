@@ -7,6 +7,7 @@ setup(
     version = version,
     description = 'Django Admin Filters',
     author = 'Jonas Obrist',
+    author_email = 'jonas.obrist@divio.ch',
     url = 'http://github.com/ojii/django-admin-filters',
     packages = find_packages(),
     zip_safe=False,
