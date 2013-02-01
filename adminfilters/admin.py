@@ -1,9 +1,6 @@
 from django.contrib.admin.views.main import ChangeList
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.filterspecs import FilterSpec
-from django.conf import settings
-
-GENERIC_FILTERS_ON_TOP = getattr(settings, "GENERIC_FILTERS_ON_TOP", False)
 
 
 class GenericFilterSpec(FilterSpec):
@@ -36,6 +33,10 @@ class GenericFilterChangeList(ChangeList):
     def generic_filters(self):
         return getattr(self.model_admin, 'generic_filters', None)
 
+    @property
+    def generic_filters_on_top(self):
+        return getattr(self.model_admin, 'generic_filters_on_top', False)
+
     def build_filter_spec(self, choices, title):
         return GenericFilterSpec(choices, self.request, title)
 
@@ -51,7 +52,7 @@ class GenericFilterChangeList(ChangeList):
                 spec = func(request, self)
                 if spec and spec.has_output():
                     generic_filters.append(spec)
-        if GENERIC_FILTERS_ON_TOP:
+        if self.generic_filters_on_top:
             filter_specs = generic_filters + filter_specs
         else:
             filter_specs = filter_specs + generic_filters
