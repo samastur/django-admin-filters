@@ -40,6 +40,12 @@ Generic Filters Property
 The ``generic_filters`` property on a ``GenericFilterAdmin`` subclass defines a
 sequence of filter methods on the same class. 
 	        
+Generic Filters On Top Property
+-------------------------------
+The ``generic_filters_on_top`` property on ModelAdmin classes controls where
+will generic filters be added in list of filters. Default value: False (at the
+bottom).
+
 	        
 Filter Methods
 --------------
