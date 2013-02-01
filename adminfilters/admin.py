@@ -1,6 +1,9 @@
 from django.contrib.admin.views.main import ChangeList
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.filterspecs import FilterSpec
+from django.conf import settings
+
+GENERIC_FILTERS_ON_TOP = getattr(settings, "GENERIC_FILTERS_ON_TOP", False)
 
 
 class GenericFilterSpec(FilterSpec):
@@ -8,13 +11,13 @@ class GenericFilterSpec(FilterSpec):
         self.data = data
         self.request = request
         self._title = title
-        
+
     def title(self):
         return self._title
-        
+
     def has_output(self):
         return True
-        
+
     def choices(self, changelist):
         if callable(self.data):
             choices = list(self.data())
@@ -22,31 +25,36 @@ class GenericFilterSpec(FilterSpec):
             choices = list(self.data)
         for choice in [dict(zip(['selected', 'query_string', 'display'], x)) for x in choices]:
             yield choice
-            
+
 
 class GenericFilterChangeList(ChangeList):
     def __init__(self, request, *args, **kwargs):
         self.request = request
         super(GenericFilterChangeList, self).__init__(request, *args, **kwargs)
-          
+
     @property
     def generic_filters(self):
         return getattr(self.model_admin, 'generic_filters', None)
-    
+
     def build_filter_spec(self, choices, title):
         return GenericFilterSpec(choices, self.request, title)
-        
+
     def get_filters(self, request):
         """
         Extend ChangeList.get_filters to include generic_filters.
         """
         filter_specs = super(GenericFilterChangeList, self).get_filters(request)[0]
+        generic_filters = []
         if self.generic_filters:
             for fname in self.generic_filters:
                 func = getattr(self.model_admin, fname)
                 spec = func(request, self)
                 if spec and spec.has_output():
-                    filter_specs.append(spec)
+                    generic_filters.append(spec)
+        if GENERIC_FILTERS_ON_TOP:
+            filter_specs = generic_filters + filter_specs
+        else:
+            filter_specs = filter_specs + generic_filters
         return filter_specs, bool(filter_specs)
 
 
